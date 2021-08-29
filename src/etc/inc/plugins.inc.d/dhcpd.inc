@@ -235,16 +235,37 @@ function dhcpd_radvd_configure($verbose = false, $blacklist = array())
             continue;
         }
 
+        $realif = get_real_interface($dhcpv6if, 'inet6');
+        $ifcfgipv6 = interfaces_primary_address6($dhcpv6if, $realif, $ifconfig_details);
+
         /*
          * Check if we need to listen on a CARP interface.  A CARP setup will try
          * to leave the clients configured: RemoveRoute off / DeprecatePrefix off
          */
-        $ifcfgipv6 = get_interface_ipv6(!empty($dhcpv6ifconf['rainterface']) && $dhcpv6ifconf['rainterface'] != 'static' ? $dhcpv6ifconf['rainterface'] : $dhcpv6if);
+        if (!empty($dhcpv6ifconf['rainterface']) && $dhcpv6ifconf['rainterface'] != 'static') {
+            $ifcfgipv6 = null;
+
+            foreach (config_read_array('virtualip', 'vip') as $vip) {
+                switch ($vip['mode']) {
+                    case 'carp':
+                    case 'ipalias':
+                        if (!empty($vip['vhid']) && $dhcpv6ifconf['rainterface'] == "{$vip['interface']}_vip{$vip['vhid']}") {
+                            if (is_linklocal($vip['subnet'])) {
+                                $ifcfgipv6 = $vip['subnet'];
+                                break 2;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
         if (!is_ipaddrv6($ifcfgipv6) && !isset($config['interfaces'][$dhcpv6if]['dhcpd6track6allowoverride'])) {
             continue;
         }
 
-        $realif = get_real_interface($dhcpv6if, 'inet6');
         $radvdifs[$realif] = 1;
 
         $mtu = legacy_interface_stats($realif)['mtu'];

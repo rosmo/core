@@ -517,7 +517,7 @@ endif;?>
 <?php if (empty($config['interfaces'][$data['if']]['virtual']) && isset($config['interfaces'][$data['if']]['enable'])): ?>
 <?php if (is_ipaddrv6($config['interfaces'][$data['if']]['ipaddrv6']) || !empty($config['interfaces'][$data['if']]['dhcpd6track6allowoverride'])): ?>
 <?php if ($data['type'] == 'dynamic'): ?>
-                        <a class="btn btn-default btn-xs" href="services_dhcpv6_edit.php?if=<?=$data['if'];?>&amp;duid=<?=$data['duid'];?>&amp;hostname=<?=$data['hostname'];?>">
+                        <a class="btn btn-default btn-xs" href="services_dhcpv6_edit.php?if=<?=$data['if'];?>&amp;duid=<?=$data['duid'];?>&amp;hostname=<?=$data['hostname'];?>&amp;ipaddrv6=<?=$data['ip'];?>">
                           <i class="fa fa-plus fa-fw"></i>
                         </a>
 <?php if ($data['online'] != 'online'): ?>
